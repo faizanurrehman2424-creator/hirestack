@@ -48,7 +48,7 @@ def clean_text(text):
 
 class Round8_PDF(FPDF):
     def header(self):
-        logo_path = os.path.join(app.root_path, 'static', 'logo.png')
+        logo_path = os.path.join(app.root_path, 'static', 'logos.png')
         if os.path.exists(logo_path):
             # --- FIX: Smaller Box & Logo to prevent bleeding ---
             self.set_fill_color(0, 0, 0) 
