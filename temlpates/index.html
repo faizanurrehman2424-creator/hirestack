@@ -9,10 +9,10 @@
     <style>
         .hidden-section { display: none; opacity: 0; transition: opacity 0.5s ease-in; }
         .fade-in { opacity: 1; }
-        /* Logo fix: Ensures the white logo looks good and is sized correctly */
+        /* Logo fix */
         img.logo-fix { max-height: 80px; width: auto; display: block; margin: 0 auto; }
         
-        /* Custom scrollbar for a premium feel */
+        /* Custom scrollbar */
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #18181b; }
         ::-webkit-scrollbar-thumb { background: #52525b; border-radius: 4px; }
@@ -25,7 +25,7 @@
         <div class="flex justify-center mb-6">
             <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" class="logo-fix">
         </div>
-        <p class="text-gray-400 font-light tracking-widest text-sm uppercase">Automated Anonymization & Job Search</p>
+        <p class="text-gray-400 font-light tracking-widest text-sm uppercase">Automated Anonymization & Job Search (PK)</p>
     </div>
 
     <div class="max-w-5xl mx-auto p-6 space-y-12 flex-grow w-full">
@@ -62,7 +62,7 @@
                         <i class="fas fa-file-pdf"></i> Download PDF
                     </button>
                     <button onclick="startJobSearch()" class="bg-white hover:bg-gray-200 text-black font-bold py-4 px-8 rounded-lg shadow-lg flex items-center gap-2 transition">
-                        <i class="fas fa-search-location"></i> Find UK Jobs
+                        <i class="fas fa-search-location"></i> Find Jobs in Pakistan
                     </button>
                 </div>
             </div>
@@ -71,7 +71,7 @@
         <div id="jobSection" class="hidden-section pb-12">
             <div class="bg-zinc-900 rounded-xl border border-zinc-800 p-8 shadow-2xl">
                 <div class="flex justify-between items-center mb-8">
-                    <h2 class="text-2xl font-bold text-white tracking-tight">AI Matched Jobs <span class="text-zinc-500 text-lg">(UK)</span></h2>
+                    <h2 class="text-2xl font-bold text-white tracking-tight">AI Matched Jobs <span class="text-zinc-500 text-lg">(Pakistan)</span></h2>
                     <button onclick="downloadCSV()" class="text-zinc-400 hover:text-white font-semibold transition flex items-center gap-2 border border-zinc-700 px-4 py-2 rounded hover:border-zinc-500">
                         <i class="fas fa-file-csv"></i> Export CSV
                     </button>
@@ -96,6 +96,13 @@
                         <tbody id="jobTableBody" class="text-gray-300 text-sm divide-y divide-zinc-800"></tbody>
                     </table>
                 </div>
+
+                <div class="mt-8 text-center pt-6 border-t border-zinc-800">
+                    <a href="https://docs.google.com/spreadsheets/d/1mAmuoeaIosiPZDmTC5S65xkC3tYXjP3nzc2m1MXDfrY/" target="_blank" class="inline-flex items-center gap-2 text-green-400 hover:text-green-300 transition font-semibold hover:underline">
+                        <i class="fas fa-table"></i> View Live Google Sheet Database
+                    </a>
+                </div>
+
             </div>
         </div>
 
@@ -181,11 +188,9 @@
                 document.getElementById('jobLoader').classList.add('hidden');
 
                 jobs.forEach(job => {
-                    // Logic Logic stays same, but CLASSES are updated for Dark Mode
                     let scoreClass = 'bg-zinc-800 text-zinc-400 border-zinc-700';
                     let score = job.match_score || 0;
                     
-                    // High scores get White/Bright text. Moderate get gray.
                     if (score >= 80) scoreClass = 'bg-zinc-800 text-white border-white shadow-[0_0_10px_rgba(255,255,255,0.2)]';
                     else if (score >= 50) scoreClass = 'bg-zinc-800 text-gray-300 border-gray-500';
 
