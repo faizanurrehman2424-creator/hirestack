@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CV Anonymizer & Job Search</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .hidden-section { display: none; opacity: 0; transition: opacity 0.5s ease-in; }
+        .fade-in { opacity: 1; }
+        /* Clean logo display */
+        img.logo-fix { max-height: 80px; width: auto; }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+
+    <div class="bg-white py-8 px-6 text-center shadow-md border-b border-gray-200">
+        <div class="flex justify-center mb-4">
+            <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" class="logo-fix">
+        </div>
+        <p class="text-blue-900 font-semibold tracking-wide">Automated Anonymization & UK Job Search</p>
+    </div>
+
+    <div class="max-w-5xl mx-auto p-6 space-y-8">
+
+        <div id="uploadSection" class="bg-white rounded-xl shadow-sm p-10 text-center border-2 border-dashed border-gray-300 hover:border-blue-500 transition-colors cursor-pointer" onclick="document.getElementById('fileInput').click()">
+            <input type="file" id="fileInput" class="hidden" accept="application/pdf" onchange="handleFileSelect(this)">
+            <div class="text-6xl text-blue-200 mb-4"><i class="fas fa-cloud-upload-alt"></i></div>
+            <h2 class="text-2xl font-bold text-gray-700">Drop Candidate CV Here</h2>
+            <p class="text-gray-400 mt-2">Supports PDF format</p>
+            <p id="fileName" class="text-green-600 font-semibold mt-4 hidden"></p>
+        </div>
+
+        <div id="processBtnContainer" class="text-center hidden-section">
+            <button onclick="processCV()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transform transition hover:scale-105 flex items-center gap-2 mx-auto">
+                <i class="fas fa-magic"></i> Analyze CV
+            </button>
+        </div>
+
+        <div id="loader" class="hidden-section text-center py-8">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p class="text-gray-600 animate-pulse">AI is reading the CV...</p>
+        </div>
+
+        <div id="resultSection" class="hidden-section bg-white rounded-xl shadow-md overflow-hidden">
+            <div class="bg-gray-50 p-4 border-b border-gray-100 flex justify-between items-center">
+                <h3 class="font-bold text-green-700"><i class="fas fa-check-circle"></i> Analysis Complete</h3>
+                <span id="realNameBadge" class="bg-blue-50 text-blue-800 text-xs px-3 py-1 rounded-full border border-blue-100">Processing...</span>
+            </div>
+            <div class="p-8 text-center">
+                <div class="flex gap-4 justify-center flex-wrap">
+                    <button onclick="downloadPDF()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-8 rounded-lg shadow-lg flex items-center gap-2">
+                        <i class="fas fa-file-pdf"></i> Download PDF
+                    </button>
+                    <button onclick="startJobSearch()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 px-8 rounded-lg shadow-lg flex items-center gap-2">
+                        <i class="fas fa-search-location"></i> Find UK Jobs
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="jobSection" class="hidden-section">
+            <div class="bg-white rounded-xl shadow-md p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800">AI Matched Jobs (UK)</h2>
+                    <button onclick="downloadCSV()" class="text-blue-600 hover:underline font-semibold"><i class="fas fa-file-csv"></i> Export CSV</button>
+                </div>
+                
+                <div id="jobLoader" class="text-center py-8 hidden">
+                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto"></div>
+                    <p class="text-gray-500 mt-2">Searching & Scoring matches...</p>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-gray-50 text-gray-600 text-sm uppercase">
+                                <th class="p-3 border-b w-16">Score</th>
+                                <th class="p-3 border-b">Role & Insight</th>
+                                <th class="p-3 border-b">Company</th>
+                                <th class="p-3 border-b">Location</th>
+                                <th class="p-3 border-b">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="jobTableBody" class="text-gray-700 text-sm"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        let currentData = null;
+        let currentJobs = null;
+
+        function handleFileSelect(input) {
+            if (input.files && input.files[0]) {
+                document.getElementById('fileName').textContent = `Selected: ${input.files[0].name}`;
+                document.getElementById('fileName').classList.remove('hidden');
+                document.getElementById('processBtnContainer').style.display = 'block';
+                setTimeout(() => document.getElementById('processBtnContainer').classList.add('fade-in'), 10);
+            }
+        }
+
+        async function processCV() {
+            const formData = new FormData();
+            formData.append('file', document.getElementById('fileInput').files[0]);
+            
+            document.getElementById('processBtnContainer').style.display = 'none';
+            document.getElementById('loader').style.display = 'block';
+            document.getElementById('loader').classList.add('fade-in');
+
+            try {
+                const res = await fetch('/anonymize', { method: 'POST', body: formData });
+                const data = await res.json();
+                if (data.error) throw new Error(data.error);
+                
+                currentData = data;
+                document.getElementById('loader').style.display = 'none';
+                document.getElementById('resultSection').style.display = 'block';
+                setTimeout(() => document.getElementById('resultSection').classList.add('fade-in'), 10);
+                document.getElementById('realNameBadge').textContent = `Candidate: ${data.real_name}`;
+            } catch (e) {
+                alert(e.message);
+                document.getElementById('loader').style.display = 'none';
+            }
+        }
+
+        async function downloadPDF() {
+            if (!currentData) return;
+            const res = await fetch('/download_pdf', { 
+                method: 'POST', 
+                headers: {'Content-Type': 'application/json'}, 
+                body: JSON.stringify(currentData) 
+            });
+            const blob = await res.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a'); a.href = url; a.download = 'CV.pdf'; a.click();
+        }
+
+        async function startJobSearch() {
+            const jobSection = document.getElementById('jobSection');
+            jobSection.style.display = 'block';
+            setTimeout(() => jobSection.classList.add('fade-in'), 10);
+            jobSection.scrollIntoView({ behavior: 'smooth' });
+            
+            const tbody = document.getElementById('jobTableBody');
+            tbody.innerHTML = '';
+            document.getElementById('jobLoader').classList.remove('hidden');
+
+            try {
+                const payload = {
+                    job_titles: currentData.job_titles,
+                    real_name: currentData.real_name,
+                    cv_skills: currentData.structured_cv.skills 
+                };
+
+                const res = await fetch('/search_jobs', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(payload)
+                });
+                const jobs = await res.json();
+                currentJobs = jobs;
+                document.getElementById('jobLoader').classList.add('hidden');
+
+                jobs.forEach(job => {
+                    let scoreClass = 'bg-gray-100 text-gray-800';
+                    let score = job.match_score || 0;
+                    if (score >= 80) scoreClass = 'bg-green-100 text-green-800 border-green-200';
+                    else if (score >= 50) scoreClass = 'bg-yellow-100 text-yellow-800 border-yellow-200';
+
+                    const row = `
+                        <tr class="border-b hover:bg-gray-50 transition">
+                            <td class="p-3">
+                                <div class="w-12 h-12 rounded-full flex items-center justify-center font-bold text-sm border ${scoreClass}">
+                                    ${score}%
+                                </div>
+                            </td>
+                            <td class="p-3">
+                                <div class="font-bold text-gray-800">${job.title}</div>
+                                <div class="text-xs text-gray-500 mt-1 italic">
+                                    <i class="fas fa-robot text-indigo-400"></i> ${job.match_reason || "Matching..."}
+                                </div>
+                            </td>
+                            <td class="p-3 text-gray-600">${job.company}</td>
+                            <td class="p-3 text-gray-500">${job.location}</td>
+                            <td class="p-3">
+                                <a href="${job.job_url}" target="_blank" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-3 py-2 rounded transition">
+                                    Link
+                                </a>
+                            </td>
+                        </tr>
+                    `;
+                    tbody.innerHTML += row;
+                });
+            } catch (e) {
+                alert('Job Search Failed: ' + e.message);
+                document.getElementById('jobLoader').classList.add('hidden');
+            }
+        }
+
+        async function downloadCSV() {
+            if (!currentJobs) return;
+            const res = await fetch('/generate_csv', { 
+                method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({jobs: currentJobs}) 
+            });
+            const blob = await res.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a'); a.href = url; a.download = 'jobs.csv'; a.click();
+        }
+    </script>
+</body>
+</html>
