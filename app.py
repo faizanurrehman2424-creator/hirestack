@@ -54,13 +54,14 @@ class Round8_PDF(FPDF):
     def header(self):
         logo_path = os.path.join(app.root_path, 'static', 'logo.png')
         if os.path.exists(logo_path):
-            # --- UPDATE: Draw Black Box Behind Logo ---
-            self.set_fill_color(0, 0, 0) # Black color
-            self.rect(10, 10, 42, 15, 'F') # Draw filled rectangle (x,y,w,h)
+            # --- FIX: Larger Box & Logo Scaling ---
+            self.set_fill_color(0, 0, 0) # Black
+            # Draw box (x=10, y=8, w=50, h=20)
+            self.rect(10, 8, 50, 20, 'F') 
             
-            # Place logo on top of the black box
-            self.image(logo_path, x=11, y=11, w=40) 
-        self.ln(25)
+            # Place logo inside (x=12, y=10, w=45) - fits inside the 50 width
+            self.image(logo_path, x=12, y=10, w=45) 
+        self.ln(25) # Line break to move text below the logo area
 
     def footer(self):
         self.set_y(-15)
@@ -71,17 +72,17 @@ class Round8_PDF(FPDF):
     def section_header(self, title):
         self.ln(5)
         self.set_font('Arial', 'B', 12)
-        self.set_text_color(30, 58, 138)
+        self.set_text_color(0, 0, 0) # Black Header
         self.cell(0, 8, clean_text(title).upper(), 0, 1, 'L')
         x = self.get_x()
         y = self.get_y()
-        self.set_draw_color(30, 58, 138)
+        self.set_draw_color(0, 0, 0) # Black Line
         self.line(10, y, 200, y) 
         self.ln(3)
 
     def section_body(self, text):
         self.set_font('Arial', '', 10)
-        self.set_text_color(0, 0, 0)
+        self.set_text_color(50, 50, 50) # Dark Gray text
         self.multi_cell(0, 5, clean_text(text))
         self.ln(3)
 
@@ -186,7 +187,7 @@ def download_pdf():
     pdf.set_auto_page_break(auto=True, margin=15)
 
     pdf.set_font("Arial", "B", 16)
-    pdf.set_text_color(30, 58, 138)
+    pdf.set_text_color(0, 0, 0)
     role_title = clean_text(cv_data.get('role_title', 'CANDIDATE PROFILE'))
     pdf.cell(0, 10, role_title, 0, 1, 'L')
     
@@ -253,8 +254,8 @@ def search_jobs():
 
     for title in search_queries:
         if len(raw_results) >= 20: break 
-        # --- UPDATE: Location changed to Pakistan ---
-        payload = { "keywords": title, "location": "Pakistan", "page": 1 }
+        # --- UPDATE: Location switched to USA ---
+        payload = { "keywords": title, "location": "United States", "page": 1 }
 
         try:
             response = requests.post(API_URL, json=payload)
@@ -281,7 +282,7 @@ def search_jobs():
         final_jobs.append({
             "title": job.get('title'),
             "company": job.get('company', 'Unknown'),
-            "location": job.get('location', 'Pakistan'), # Default to Pakistan
+            "location": job.get('location', 'United States'),
             "job_url": job.get('link'),
             "description": job.get('snippet', ''),
             "match_score": 0,
