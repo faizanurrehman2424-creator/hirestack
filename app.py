@@ -48,18 +48,18 @@ def clean_text(text):
 
 class Round8_PDF(FPDF):
     def header(self):
-        # Change filename to logo.png if that is your correct file
+        # Use logos.png or logo.png depending on your actual filename
         logo_path = os.path.join(app.root_path, 'static', 'logos.png') 
         
         if os.path.exists(logo_path):
-            # --- UPDATED: No black box, positioned top-left ---
-            # x=10, y=10 provides a small margin from the top-left edges
-            # w=40 makes the logo a professional size
-            self.image(logo_path, x=10, y=10, w=40) 
+            # --- UPDATED: Smaller logo and Top-Left placement ---
+            # Reduced w from 40 to 30 for a more professional, smaller look
+            self.image(logo_path, x=10, y=10, w=30) 
             
-        # --- UPDATED: Spacing between logo and heading ---
-        # Increased to 30 to give clear room for the logo before text starts
-        self.ln(30) 
+        # --- UPDATED: Increased Spacing ---
+        # Increased to 35. This ensures the cursor moves down far enough 
+        # so that the heading (which is printed next) cannot touch the logo.
+        self.ln(35) 
 
     def footer(self):
         self.set_y(-15)
@@ -75,12 +75,6 @@ class Round8_PDF(FPDF):
         y = self.get_y()
         self.set_draw_color(0, 0, 0)
         self.line(10, y, 200, y) 
-        self.ln(3)
-
-    def section_body(self, text):
-        self.set_font('Arial', '', 10)
-        self.set_text_color(50, 50, 50)
-        self.multi_cell(0, 5, clean_text(text))
         self.ln(3)
         
 def extract_text_from_pdf(pdf_path):
