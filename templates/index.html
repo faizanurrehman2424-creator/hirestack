@@ -9,8 +9,8 @@
     <style>
         .hidden-section { display: none; opacity: 0; transition: opacity 0.5s ease-in; }
         .fade-in { opacity: 1; }
-        /* Logo fix */
-        img.logo-fix { max-height: 80px; width: auto; display: block; margin: 0 auto; }
+        /* Logo fix: Increased size */
+        img.logo-fix { max-height: 120px; width: auto; display: block; margin: 0 auto; }
         
         /* Custom scrollbar */
         ::-webkit-scrollbar { width: 8px; }
@@ -19,27 +19,27 @@
         ::-webkit-scrollbar-thumb:hover { background: #71717a; }
     </style>
 </head>
-<body class="bg-black text-gray-300 font-sans min-h-screen flex flex-col">
+<body class="bg-black text-gray-800 font-sans min-h-screen flex flex-col">
 
-    <div class="bg-black py-8 px-6 text-center border-b border-zinc-800">
+    <div class="bg-black py-10 px-6 text-center border-b border-zinc-800">
         <div class="flex justify-center mb-6">
             <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" class="logo-fix">
         </div>
-        <p class="text-gray-400 font-light tracking-widest text-sm uppercase">Automated Anonymization & Job Search (PK)</p>
+        <p class="text-gray-400 font-light tracking-widest text-sm uppercase">Automated Anonymization & Job Search (USA)</p>
     </div>
 
     <div class="max-w-5xl mx-auto p-6 space-y-12 flex-grow w-full">
 
-        <div id="uploadSection" class="bg-zinc-900 rounded-xl p-12 text-center border-2 border-dashed border-zinc-700 hover:border-white transition-all duration-300 cursor-pointer group" onclick="document.getElementById('fileInput').click()">
+        <div id="uploadSection" class="bg-white rounded-xl p-12 text-center border-2 border-dashed border-gray-300 hover:border-black transition-all duration-300 cursor-pointer shadow-2xl group" onclick="document.getElementById('fileInput').click()">
             <input type="file" id="fileInput" class="hidden" accept="application/pdf" onchange="handleFileSelect(this)">
-            <div class="text-6xl text-zinc-600 group-hover:text-white transition-colors mb-6"><i class="fas fa-cloud-upload-alt"></i></div>
-            <h2 class="text-3xl font-bold text-white tracking-tight">Drop Candidate CV Here</h2>
-            <p class="text-zinc-500 mt-3">Supports PDF format</p>
-            <p id="fileName" class="text-white font-mono bg-zinc-800 inline-block px-4 py-1 rounded mt-6 hidden border border-zinc-700"></p>
+            <div class="text-6xl text-gray-400 group-hover:text-black transition-colors mb-6"><i class="fas fa-cloud-upload-alt"></i></div>
+            <h2 class="text-4xl font-bold text-black tracking-tight">Drop Candidate CV Here</h2>
+            <p class="text-gray-500 mt-3">Supports PDF format</p>
+            <p id="fileName" class="text-black font-mono bg-gray-100 inline-block px-4 py-1 rounded mt-6 hidden border border-gray-300"></p>
         </div>
 
         <div id="processBtnContainer" class="text-center hidden-section">
-            <button onclick="processCV()" class="bg-white hover:bg-gray-200 text-black font-bold py-4 px-10 rounded-full shadow-[0_0_20px_rgba(255,255,255,0.1)] transform transition hover:scale-105 flex items-center gap-3 mx-auto">
+            <button onclick="processCV()" class="bg-black hover:bg-zinc-800 text-white font-bold py-4 px-12 rounded-full shadow-lg transform transition hover:scale-105 flex items-center gap-3 mx-auto text-lg">
                 <i class="fas fa-magic"></i> <span class="tracking-wide">ANALYZE CV</span>
             </button>
         </div>
@@ -49,43 +49,43 @@
             <p class="text-zinc-400 animate-pulse tracking-wide">AI is reading the CV...</p>
         </div>
 
-        <div id="resultSection" class="hidden-section bg-zinc-900 rounded-xl border border-zinc-800 overflow-hidden shadow-2xl">
-            <div class="bg-zinc-950 p-5 border-b border-zinc-800 flex justify-between items-center">
-                <h3 class="font-bold text-white flex items-center gap-2">
-                    <i class="fas fa-check-circle"></i> Analysis Complete
+        <div id="resultSection" class="hidden-section bg-white rounded-xl border border-gray-200 overflow-hidden shadow-2xl">
+            <div class="bg-gray-50 p-5 border-b border-gray-200 flex justify-between items-center">
+                <h3 class="font-bold text-black flex items-center gap-2">
+                    <i class="fas fa-check-circle text-green-600"></i> Analysis Complete
                 </h3>
-                <span id="realNameBadge" class="bg-zinc-800 text-gray-300 text-xs px-4 py-1 rounded-full border border-zinc-700 font-mono">Processing...</span>
+                <span id="realNameBadge" class="bg-black text-white text-xs px-4 py-1 rounded-full font-mono">Processing...</span>
             </div>
             <div class="p-10 text-center">
                 <div class="flex gap-5 justify-center flex-wrap">
-                    <button onclick="downloadPDF()" class="border-2 border-zinc-600 hover:border-white text-white hover:bg-zinc-800 font-bold py-4 px-8 rounded-lg transition flex items-center gap-2">
+                    <button onclick="downloadPDF()" class="border-2 border-black hover:bg-black hover:text-white text-black font-bold py-4 px-8 rounded-lg transition flex items-center gap-2">
                         <i class="fas fa-file-pdf"></i> Download PDF
                     </button>
-                    <button onclick="startJobSearch()" class="bg-white hover:bg-gray-200 text-black font-bold py-4 px-8 rounded-lg shadow-lg flex items-center gap-2 transition">
-                        <i class="fas fa-search-location"></i> Find Jobs in Pakistan
+                    <button onclick="startJobSearch()" class="bg-black hover:bg-zinc-800 text-white font-bold py-4 px-8 rounded-lg shadow-lg flex items-center gap-2 transition">
+                        <i class="fas fa-search-location"></i> Find Jobs (USA)
                     </button>
                 </div>
             </div>
         </div>
 
         <div id="jobSection" class="hidden-section pb-12">
-            <div class="bg-zinc-900 rounded-xl border border-zinc-800 p-8 shadow-2xl">
+            <div class="bg-white rounded-xl border border-gray-200 p-8 shadow-2xl">
                 <div class="flex justify-between items-center mb-8">
-                    <h2 class="text-2xl font-bold text-white tracking-tight">AI Matched Jobs <span class="text-zinc-500 text-lg">(Pakistan)</span></h2>
-                    <button onclick="downloadCSV()" class="text-zinc-400 hover:text-white font-semibold transition flex items-center gap-2 border border-zinc-700 px-4 py-2 rounded hover:border-zinc-500">
+                    <h2 class="text-2xl font-bold text-black tracking-tight">AI Matched Jobs <span class="text-gray-500 text-lg">(USA)</span></h2>
+                    <button onclick="downloadCSV()" class="text-gray-500 hover:text-black font-semibold transition flex items-center gap-2 border border-gray-300 px-4 py-2 rounded hover:border-black">
                         <i class="fas fa-file-csv"></i> Export CSV
                     </button>
                 </div>
                 
                 <div id="jobLoader" class="text-center py-12 hidden">
-                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto"></div>
-                    <p class="text-zinc-500 mt-4">Searching & Scoring matches...</p>
+                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-black mx-auto"></div>
+                    <p class="text-gray-500 mt-4">Searching & Scoring matches...</p>
                 </div>
 
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse">
                         <thead>
-                            <tr class="bg-zinc-950 text-zinc-500 text-xs uppercase tracking-wider border-b border-zinc-800">
+                            <tr class="bg-gray-100 text-gray-600 text-xs uppercase tracking-wider border-b border-gray-200">
                                 <th class="p-4 w-20">Match</th>
                                 <th class="p-4">Role & Insight</th>
                                 <th class="p-4">Company</th>
@@ -93,12 +93,12 @@
                                 <th class="p-4">Action</th>
                             </tr>
                         </thead>
-                        <tbody id="jobTableBody" class="text-gray-300 text-sm divide-y divide-zinc-800"></tbody>
+                        <tbody id="jobTableBody" class="text-gray-700 text-sm divide-y divide-gray-100"></tbody>
                     </table>
                 </div>
 
-                <div class="mt-8 text-center pt-6 border-t border-zinc-800">
-                    <a href="https://docs.google.com/spreadsheets/d/1mAmuoeaIosiPZDmTC5S65xkC3tYXjP3nzc2m1MXDfrY/" target="_blank" class="inline-flex items-center gap-2 text-green-400 hover:text-green-300 transition font-semibold hover:underline">
+                <div class="mt-8 text-center pt-6 border-t border-gray-200">
+                    <a href="https://docs.google.com/spreadsheets/d/1mAmuoeaIosiPZDmTC5S65xkC3tYXjP3nzc2m1MXDfrY/" target="_blank" class="inline-flex items-center gap-2 text-green-600 hover:text-green-800 transition font-semibold hover:underline">
                         <i class="fas fa-table"></i> View Live Google Sheet Database
                     </a>
                 </div>
@@ -108,7 +108,7 @@
 
     </div>
 
-    <div class="text-center py-6 text-zinc-700 text-xs">
+    <div class="text-center py-6 text-zinc-500 text-xs">
         <p>&copy; 2024 HanSan J. Technologies</p>
     </div>
 
@@ -188,29 +188,30 @@
                 document.getElementById('jobLoader').classList.add('hidden');
 
                 jobs.forEach(job => {
-                    let scoreClass = 'bg-zinc-800 text-zinc-400 border-zinc-700';
+                    // Styles updated for WHITE background
+                    let scoreClass = 'bg-gray-200 text-gray-500';
                     let score = job.match_score || 0;
                     
-                    if (score >= 80) scoreClass = 'bg-zinc-800 text-white border-white shadow-[0_0_10px_rgba(255,255,255,0.2)]';
-                    else if (score >= 50) scoreClass = 'bg-zinc-800 text-gray-300 border-gray-500';
+                    if (score >= 80) scoreClass = 'bg-black text-white border-black';
+                    else if (score >= 50) scoreClass = 'bg-gray-800 text-white';
 
                     const row = `
-                        <tr class="hover:bg-zinc-800 transition group">
+                        <tr class="hover:bg-gray-50 transition group">
                             <td class="p-4">
                                 <div class="w-12 h-12 rounded-full flex items-center justify-center font-bold text-sm border ${scoreClass}">
                                     ${score}%
                                 </div>
                             </td>
                             <td class="p-4">
-                                <div class="font-bold text-white text-lg">${job.title}</div>
-                                <div class="text-xs text-zinc-500 mt-1 italic group-hover:text-zinc-400 transition-colors">
-                                    <i class="fas fa-robot text-zinc-600"></i> ${job.match_reason || "Matching..."}
+                                <div class="font-bold text-black text-lg">${job.title}</div>
+                                <div class="text-xs text-gray-500 mt-1 italic">
+                                    <i class="fas fa-robot text-gray-400"></i> ${job.match_reason || "Matching..."}
                                 </div>
                             </td>
-                            <td class="p-4 text-zinc-400">${job.company}</td>
-                            <td class="p-4 text-zinc-500">${job.location}</td>
+                            <td class="p-4 text-gray-700">${job.company}</td>
+                            <td class="p-4 text-gray-500">${job.location}</td>
                             <td class="p-4">
-                                <a href="${job.job_url}" target="_blank" class="bg-white hover:bg-gray-200 text-black text-xs font-bold px-4 py-2 rounded transition inline-block">
+                                <a href="${job.job_url}" target="_blank" class="bg-black hover:bg-gray-800 text-white text-xs font-bold px-4 py-2 rounded transition inline-block">
                                     APPLY
                                 </a>
                             </td>
