@@ -22,12 +22,10 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(STATIC_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-# 1. SETUP GEMINI API
 GENAI_API_KEY = os.environ.get("GENAI_API_KEY")
 if GENAI_API_KEY:
     genai.configure(api_key=GENAI_API_KEY)
 
-# 2. SETUP GOOGLE SHEETS
 try:
     scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
     creds = ServiceAccountCredentials.from_json_keyfile_name("credentials.json", scope)
@@ -37,7 +35,6 @@ except Exception as e:
     print(f"Warning: Google Sheets not connected. Error: {e}")
     sheet = None
 
-# --- TEXT CLEANING HELPER ---
 def clean_text(text):
     if not text: return ""
     text = str(text)
@@ -49,19 +46,18 @@ def clean_text(text):
         text = text.replace(char, repl)
     return text.encode('latin-1', 'replace').decode('latin-1')
 
-# --- PDF GENERATOR CLASS ---
 class Round8_PDF(FPDF):
     def header(self):
         logo_path = os.path.join(app.root_path, 'static', 'logo.png')
         if os.path.exists(logo_path):
-            # --- FIX: Larger Box & Logo Scaling ---
-            self.set_fill_color(0, 0, 0) # Black
-            # Draw box (x=10, y=8, w=50, h=20)
-            self.rect(10, 8, 50, 20, 'F') 
+            # --- FIX: Smaller Box & Logo to prevent bleeding ---
+            self.set_fill_color(0, 0, 0) 
+            # Box: x=10, y=8, width=35, height=15
+            self.rect(10, 8, 35, 15, 'F') 
             
-            # Place logo inside (x=12, y=10, w=45) - fits inside the 50 width
-            self.image(logo_path, x=12, y=10, w=45) 
-        self.ln(25) # Line break to move text below the logo area
+            # Logo: x=12, y=9, width=25 (Fits nicely inside 35)
+            self.image(logo_path, x=12, y=9, w=25) 
+        self.ln(20) # Adequate spacing below logo
 
     def footer(self):
         self.set_y(-15)
@@ -72,21 +68,19 @@ class Round8_PDF(FPDF):
     def section_header(self, title):
         self.ln(5)
         self.set_font('Arial', 'B', 12)
-        self.set_text_color(0, 0, 0) # Black Header
+        self.set_text_color(0, 0, 0)
         self.cell(0, 8, clean_text(title).upper(), 0, 1, 'L')
-        x = self.get_x()
         y = self.get_y()
-        self.set_draw_color(0, 0, 0) # Black Line
+        self.set_draw_color(0, 0, 0)
         self.line(10, y, 200, y) 
         self.ln(3)
 
     def section_body(self, text):
         self.set_font('Arial', '', 10)
-        self.set_text_color(50, 50, 50) # Dark Gray text
+        self.set_text_color(50, 50, 50)
         self.multi_cell(0, 5, clean_text(text))
         self.ln(3)
 
-# --- HELPER FUNCTIONS ---
 def extract_text_from_pdf(pdf_path):
     reader = PdfReader(pdf_path)
     text = ""
@@ -159,7 +153,6 @@ def get_ai_scores(jobs, skills_list):
         print(f"Scoring Error: {e}")
     return jobs
 
-# --- ROUTES ---
 @app.route('/')
 def home():
     return render_template('index.html')
@@ -242,10 +235,12 @@ def search_jobs():
     candidate_name = data.get('real_name', 'Unknown')
     candidate_skills = data.get('cv_skills', []) 
     
+    # --- PERFORMANCE FIX: Only use 1 query to prevent timeout ---
     search_queries = []
-    for t in raw_titles[:2]: 
-        clean_t = re.sub(r'\(.*?\)', '', t).replace('/', ' ').strip()
-        if clean_t not in search_queries: search_queries.append(clean_t)
+    if raw_titles:
+        # Just grab the first title, clean it up, and use that.
+        clean_t = re.sub(r'\(.*?\)', '', raw_titles[0]).replace('/', ' ').strip()
+        search_queries.append(clean_t)
 
     JOOBLE_KEY = os.environ.get("JOOBLE_KEY")
     API_URL = "https://jooble.org/api/" + JOOBLE_KEY
@@ -253,19 +248,19 @@ def search_jobs():
     seen_urls = set()
 
     for title in search_queries:
-        if len(raw_results) >= 20: break 
-        # --- UPDATE: Location switched to USA ---
+        if len(raw_results) >= 15: break # Reduced limit
         payload = { "keywords": title, "location": "United States", "page": 1 }
 
         try:
-            response = requests.post(API_URL, json=payload)
-            data = response.json()
-            jobs = data.get('jobs', [])
-            if jobs:
-                for j in jobs:
-                    if j.get('link') not in seen_urls:
-                        raw_results.append(j)
-                        seen_urls.add(j.get('link'))
+            response = requests.post(API_URL, json=payload, timeout=5) # 5s timeout for API
+            if response.status_code == 200:
+                data = response.json()
+                jobs = data.get('jobs', [])
+                if jobs:
+                    for j in jobs:
+                        if j.get('link') not in seen_urls:
+                            raw_results.append(j)
+                            seen_urls.add(j.get('link'))
         except Exception as e:
             print(f"Jooble Error: {e}")
             continue
