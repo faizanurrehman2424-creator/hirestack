@@ -46,19 +46,17 @@ def clean_text(text):
         text = text.replace(char, repl)
     return text.encode('latin-1', 'replace').decode('latin-1')
 
+# --- PDF CLASS ---
 class Round8_PDF(FPDF):
     def header(self):
-        # Use logos.png or logo.png depending on your actual filename
+        # Ensure this filename matches exactly what is in your static folder (logo.png or logos.png)
         logo_path = os.path.join(app.root_path, 'static', 'logos.png') 
         
         if os.path.exists(logo_path):
-            # --- UPDATED: Smaller logo and Top-Left placement ---
-            # Reduced w from 40 to 30 for a more professional, smaller look
+            # Top-Left, Small Logo (w=30)
             self.image(logo_path, x=10, y=10, w=30) 
             
-        # --- UPDATED: Increased Spacing ---
-        # Increased to 35. This ensures the cursor moves down far enough 
-        # so that the heading (which is printed next) cannot touch the logo.
+        # Space below logo before text starts
         self.ln(35) 
 
     def footer(self):
@@ -76,7 +74,14 @@ class Round8_PDF(FPDF):
         self.set_draw_color(0, 0, 0)
         self.line(10, y, 200, y) 
         self.ln(3)
-        
+
+    # --- RESTORED MISSING FUNCTION ---
+    def section_body(self, text):
+        self.set_font('Arial', '', 10)
+        self.set_text_color(50, 50, 50)
+        self.multi_cell(0, 5, clean_text(text))
+        self.ln(3)
+
 def extract_text_from_pdf(pdf_path):
     reader = PdfReader(pdf_path)
     text = ""
